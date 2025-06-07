@@ -1,0 +1,22 @@
+{
+  "name": "Monthly Budget Tracker",
+  "short_name": "Budget Tracker",
+  "description": "A personal finance app to track monthly income and expenses offline.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f4f7f6",
+  "theme_color": "#2A9D8F",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTkyIiBoZWlnaHQ9IjE5MiIgdmlld0JveD0iMCAwIDUwIDUwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogIDxkZWZzPgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJpY29uR3JhZCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMyQTlEOEY7Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6IzI2NDY1MzsiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHg9IjUiIHk9IjUiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcng9IjgiIHJ5PSI4IiBmaWxsPSJ1cmwoI2ljb25HcmFkKSIvPgogIDxwYXRoIGQ9Ik0xNSAxNSBIIDM1IE0xNSAyNSBIIDM1IE0xNSAzNSBIIDI1IiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgPGNpcmNsZSBjeD0iMzAiIGN5PSIzNSIgcj0iMy41IiBmaWxsPSIjRTlDNDZBIiAvPgo8L3N2Zz4=",
+      "type": "image/svg+xml",
+      "sizes": "192x192"
+    },
+    {
+      "src": "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgdmlld0JveD0iMCAwIDUwIDUwIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgogIDxkZWZzPgogICAgPGxpbmVhckdyYWRpZW50IGlkPSJpY29uR3JhZCIgeDE9IjAlIiB5MT0iMCUiIHgyPSIxMDAlIiB5Mj0iMTAwJSI+CiAgICAgIDxzdG9wIG9mZnNldD0iMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMyQTlEOEY7Ii8+CiAgICAgIDxzdG9wIG9mZnNldD0iMTAwJSIgc3R5bGU9InN0b3AtY29sb3I6IzI2NDY1MzsiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDxyZWN0IHg9IjUiIHk9IjUiIHdpZHRoPSI0MCIgaGVpZ2h0PSI0MCIgcng9IjgiIHJ5PSI4IiBmaWxsPSJ1cmwoI2ljb25HcmFkKSIvPgogIDxwYXRoIGQ9Ik0xNSAxNSBIIDM1IE0xNSAyNSBIIDM1IE0xNSAzNSBIIDI1IiBzdHJva2U9IiNGRkZGRkYiIHN0cm9rZS13aWR0aD0iMyIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIi8+CiAgPGNpcmNsZSBjeD0iMzAiIGN5PSIzNSIgcj0iMy41IiBmaWxsPSIjRTlDNDZBIiAvPgo8L3N2Zz4=",
+      "type": "image/svg+xml",
+      "sizes": "512x512"
+    }
+  ]
+}
