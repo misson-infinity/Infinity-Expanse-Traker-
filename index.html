@@ -1,21 +1,25 @@
+<!-- index.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monthly Budget Tracker</title>
+    
+    <!-- PWA and Mobile Theme -->
+    <meta name="theme-color" content="#2A9D8F">
+    <link rel="manifest" href="manifest.json">
+    
     <link rel="stylesheet" href="style.css">
+    
     <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- jsPDF and jsPDF-AutoTable for PDF Generation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
     <header>
         <div class="logo-container">
-            <img src="logo.svg" alt="Monthly Budget Tracker Logo" class="logo">
-            <h1>Monthly Budget Tracker</h1>
+            <img src="logo.svg" alt="Budget Tracker Logo" class="logo">
+            <h1>Budget Tracker</h1>
         </div>
         <div class="theme-switcher">
             <label class="switch">
@@ -33,7 +37,7 @@
                 <form id="incomeForm">
                     <div>
                         <label for="incomeSource">Source:</label>
-                        <input type="text" id="incomeSource" placeholder="e.g., Salary, Freelance" required>
+                        <input type="text" id="incomeSource" placeholder="e.g., Salary" required>
                     </div>
                     <div>
                         <label for="incomeAmount">Amount:</label>
@@ -52,7 +56,7 @@
                 <form id="expenseForm">
                     <div>
                         <label for="expenseDescription">Description:</label>
-                        <input type="text" id="expenseDescription" placeholder="e.g., Groceries, Rent" required>
+                        <input type="text" id="expenseDescription" placeholder="e.g., Groceries" required>
                     </div>
                     <div>
                         <label for="expenseAmount">Amount:</label>
@@ -73,23 +77,12 @@
                 <div>
                     <label for="monthFilter">Month:</label>
                     <select id="monthFilter">
-                        <option value="0">January</option>
-                        <option value="1">February</option>
-                        <option value="2">March</option>
-                        <option value="3">April</option>
-                        <option value="4">May</option>
-                        <option value="5">June</option>
-                        <option value="6">July</option>
-                        <option value="7">August</option>
-                        <option value="8">September</option>
-                        <option value="9">October</option>
-                        <option value="10">November</option>
-                        <option value="11">December</option>
+                        <option value="0">January</option><option value="1">February</option><option value="2">March</option><option value="3">April</option><option value="4">May</option><option value="5">June</option><option value="6">July</option><option value="7">August</option><option value="8">September</option><option value="9">October</option><option value="10">November</option><option value="11">December</option>
                     </select>
                 </div>
                 <div>
                     <label for="yearFilter">Year:</label>
-                    <input type="number" id="yearFilter" min="2000" max="2100" value="2024">
+                    <input type="number" id="yearFilter" min="2000" max="2100">
                 </div>
             </div>
             <div class="summary">
@@ -97,25 +90,18 @@
                 <p>Total Expenses: <span id="totalExpenses">₹0.00</span></p>
                 <h3>Balance: <span id="currentBalance">₹0.00</span></h3>
             </div>
-            <button id="generatePdfBtn"><i class="fas fa-file-pdf"></i> Generate PDF Report</button>
+            <button id="generatePdfBtn"><i class="fas fa-file-pdf"></i> PDF Report</button>
         </section>
 
         <section class="data-display-section">
             <div class="table-container card">
                 <h3><i class="fas fa-arrow-down"></i> Monthly Income</h3>
                 <div class="table-wrapper">
-                    <table id="incomeTable">
+                    <table>
                         <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Source</th>
-                                <th>Amount</th>
-                                <th>Actions</th>
-                            </tr>
+                            <tr><th>Date</th><th>Source</th><th>Amount</th><th>Actions</th></tr>
                         </thead>
-                        <tbody id="incomeTableBody">
-                            <!-- Income rows will be inserted here -->
-                        </tbody>
+                        <tbody id="incomeTableBody"></tbody>
                     </table>
                 </div>
             </div>
@@ -123,18 +109,11 @@
             <div class="table-container card">
                 <h3><i class="fas fa-arrow-up"></i> Monthly Expenses</h3>
                 <div class="table-wrapper">
-                    <table id="expenseTable">
+                    <table>
                         <thead>
-                            <tr>
-                                <th>Date</th>
-                                <th>Description</th>
-                                <th>Amount</th>
-                                <th>Actions</th>
-                            </tr>
+                            <tr><th>Date</th><th>Description</th><th>Amount</th><th>Actions</th></tr>
                         </thead>
-                        <tbody id="expenseTableBody">
-                            <!-- Expense rows will be inserted here -->
-                        </tbody>
+                        <tbody id="expenseTableBody"></tbody>
                     </table>
                 </div>
             </div>
@@ -142,9 +121,25 @@
     </main>
 
     <footer>
-        <p>Website developed by Md Habibur Rahman Mahi.</p>
+        <p>Developed with ❤️ by Md Habibur Rahman Mahi.</p>
     </footer>
 
+    <!-- External Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    
+    <!-- Main App Script -->
     <script src="script.js"></script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(reg => console.log('Service Worker: Registered'))
+                    .catch(err => console.log(`Service Worker: Error: ${err}`));
+            });
+        }
+    </script>
 </body>
 </html>
