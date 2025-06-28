@@ -67,8 +67,6 @@ th { background-color: var(--secondary-color); color: white; font-weight: 600; }
 body.dark-mode th { background-color: var(--primary-color); }
 td .delete-btn { background-color: var(--danger-color); padding: 0.4rem 0.8rem; font-size: 0.9rem; width: auto; }
 td .delete-btn:hover { background-color: #cc5234; }
-
-/* --- Footer and Developer Page Styles --- */
 footer { background-color: var(--light-bg); padding: 1rem; text-align: center; border-top: 1px solid var(--border-color-light); transition: background-color 0.3s, border-color 0.3s; }
 body.dark-mode footer { background-color: var(--dark-bg); border-top: 1px solid var(--border-color-dark); }
 .footer-profile-link { display: inline-flex; align-items: center; background-color: var(--primary-color); color: white; padding: 8px 15px; border-radius: 50px; text-decoration: none; font-weight: 500; box-shadow: var(--shadow-light); transition: transform 0.2s ease, background-color 0.2s ease; }
