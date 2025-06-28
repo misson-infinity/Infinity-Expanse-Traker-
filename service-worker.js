@@ -1,12 +1,12 @@
-const CACHE_NAME = 'budget-tracker-cache-v2'; // ভার্সন আপডেট করা হয়েছে
+const CACHE_NAME = 'budget-tracker-cache-v4'; // ভার্সন আপডেট করা হয়েছে
 const urlsToCache = [
   '/',
   '/index.html',
-  '/developer.html',  // <-- নতুন পেজ যোগ করা হয়েছে
+  '/developer.html',
   '/style.css',
   '/script.js',
   '/logo.svg',
-  '/profile.jpg',      // <-- নতুন ছবি যোগ করা হয়েছে
+  '/vector_lecture_design.png',  // আপনার দেওয়া ফাইলের নাম যোগ করা হয়েছে
   '/manifest.json',
   'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
   'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js',
