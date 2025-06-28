@@ -187,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
         generatePdfBtn.addEventListener('click', generatePDF);
     }
     
-    // --- PDF GENERATION ---
+    // --- PDF GENERATION (আপনার অনুরোধ অনুযায়ী নতুন ডিজাইন) ---
 
     // Helper function to convert image to base64
     const imageToBase64 = (url) => {
@@ -205,61 +205,78 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
-            
-            // Your logo and name
             const logoUrl = 'vector_lecture_design.png';
-            const userName = 'Md Habibur Rahman Mahi';
-
             const logoBase64 = await imageToBase64(logoUrl);
 
-            // --- PDF Header ---
+            // --- নতুন হেডার ডিজাইন ---
             const pageWidth = doc.internal.pageSize.getWidth();
-            
-            doc.setFontSize(22);
+            const marginRight = 14;
+
+            // ১. বাম দিকের মূল শিরোনাম
+            doc.setFontSize(24);
             doc.setFont(undefined, 'bold');
-            doc.setTextColor('#2A9D8F'); 
-            doc.text('Infinity Expense Tracker', 14, 22);
+            doc.setTextColor('#2A9D8F'); // Primary Color
+            doc.text('Infinity Expense Tracker', marginRight, 25);
 
-            const logoSize = 15;
-            const logoX = pageWidth - 14 - logoSize;
+            // ২. ডান দিকের লোগো এবং আপনার তথ্য (বড় ও রঙিন)
+            const logoSize = 25; // ছবি বড় করা হয়েছে
+            const logoX = pageWidth - marginRight - logoSize;
             doc.addImage(logoBase64, 'PNG', logoX, 15, logoSize, logoSize);
-
-            doc.setFontSize(10);
-            doc.setFont(undefined, 'normal');
-            doc.setTextColor('#333333');
-            doc.text(userName, pageWidth - 14 - logoSize - 2, 22, { align: 'right' });
-            doc.text('Report Prepared by:', pageWidth - 14 - logoSize - 2, 18, { align: 'right' });
             
-            // --- Report Details ---
+            const textBlockX = logoX - 5; // লেখা ও ছবির মধ্যে গ্যাপ
+
+            // "Website Prepared by" লেখা
+            doc.setFontSize(9);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(150); // হালকা ধূসর রঙ
+            doc.text('Website Prepared by:', textBlockX, 20, { align: 'right' });
+
+            // আপনার নাম (বড় এবং রঙিন)
+            doc.setFontSize(14); // ফন্ট সাইজ বড় করা হয়েছে
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor('#E76F51'); // Danger Color (একটি আকর্ষণীয় রঙ)
+            doc.text('Md Habibur Rahman Mahi', textBlockX, 27, { align: 'right' });
+            
+            // আপনার পদবি (রঙিন এবং স্টাইলিশ)
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'italic');
+            doc.setTextColor('#264653'); // Secondary Color
+            doc.text('Founder of Infinity Group', textBlockX, 33, { align: 'right' });
+
+            // --- রিপোর্ট সম্পর্কিত তথ্য ---
             const selectedMonthName = monthFilter.options[monthFilter.selectedIndex].text;
             const selectedYear = yearFilter.value;
-            const currentMonthYearKey = `${selectedYear}-${monthFilter.value}`;
-            const monthData = allData[currentMonthYearKey] || { income: [], expenses: [] };
+            const reportSubTitle = `Monthly Report: ${selectedMonthName} ${selectedYear}`;
             
             doc.setFontSize(11);
+            doc.setFont(undefined, 'normal');
             doc.setTextColor(100);
-            const reportSubTitle = `Monthly Report: ${selectedMonthName} ${selectedYear}`;
-            doc.text(reportSubTitle, 14, 32);
-            doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 37);
+            doc.text(reportSubTitle, marginRight, 45); // Y-অক্ষ বরাবর নিচে নামানো হয়েছে
+            doc.text(`Generated on: ${new Date().toLocaleDateString()}`, marginRight, 50);
 
-            let yPos = 50;
+            // টেবিল শুরু করার জন্য নতুন অবস্থান
+            let yPos = 60; 
             
-            // --- Tables ---
+            // --- টেবিল ও সারাংশ (অপরিবর্তিত) ---
+            const currentMonthYearKey = `${selectedYear}-${monthFilter.value}`;
+            const monthData = allData[currentMonthYearKey] || { income: [], expenses: [] };
+
             const addTable = (title, data, headers, yStart) => {
                 if (data.length > 0) {
                     doc.setFontSize(14);
-                    doc.text(title, 14, yStart);
+                    doc.text(title, marginRight, yStart);
                     doc.autoTable({
                         startY: yStart + 7,
                         head: [headers],
                         body: data,
                         theme: 'striped',
-                        headStyles: { fillColor: title === "Income" ? [42, 157, 143] : [38, 70, 83] }
+                        headStyles: { fillColor: title === "Income" ? [42, 157, 143] : [38, 70, 83] },
+                        margin: { left: marginRight }
                     });
                     return doc.lastAutoTable.finalY + 10;
                 }
                 doc.setFontSize(12);
-                doc.text(`No ${title.toLowerCase()} data for this month.`, 14, yStart);
+                doc.text(`No ${title.toLowerCase()} data for this month.`, marginRight, yStart);
                 return yStart + 10;
             };
 
@@ -269,18 +286,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const expenseData = monthData.expenses.map(e => [formatDateForDisplay(e.date), e.description, `₹${parseFloat(e.amount).toFixed(2)}`]);
             yPos = addTable("Expenses", expenseData, ['Date', 'Description', 'Amount'], yPos);
             
-            // --- Summary ---
             const totalIncome = monthData.income.reduce((sum, item) => sum + parseFloat(item.amount), 0);
             const totalExpenses = monthData.expenses.reduce((sum, item) => sum + parseFloat(item.amount), 0);
             const balance = totalIncome - totalExpenses;
             
             doc.setFontSize(14);
-            doc.text("Summary", 14, yPos);
+            doc.text("Summary", marginRight, yPos);
             doc.setFontSize(12);
-            doc.text(`Total Income: ₹${totalIncome.toFixed(2)}`, 14, yPos + 7);
-            doc.text(`Total Expenses: ₹${totalExpenses.toFixed(2)}`, 14, yPos + 14);
+            doc.text(`Total Income: ₹${totalIncome.toFixed(2)}`, marginRight, yPos + 7);
+            doc.text(`Total Expenses: ₹${totalExpenses.toFixed(2)}`, marginRight, yPos + 14);
             doc.setFont(undefined, 'bold');
-            doc.text(`Final Balance: ₹${balance.toFixed(2)}`, 14, yPos + 21);
+            doc.text(`Final Balance: ₹${balance.toFixed(2)}`, marginRight, yPos + 21);
             
             doc.save(`Infinity_Report_${selectedMonthName}_${selectedYear}.pdf`);
         } catch (error) {
