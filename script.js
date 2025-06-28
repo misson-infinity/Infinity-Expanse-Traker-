@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
             themeIcon.classList.remove('fa-sun');
             themeIcon.classList.add('fa-moon');
         }
-        renderDataForSelectedMonth(); // Re-render to apply color changes
+        renderDataForSelectedMonth();
     }
 
     // --- DATA HANDLING ---
@@ -188,60 +188,105 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     
     // --- PDF GENERATION ---
-    function generatePDF() {
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        const selectedMonthName = monthFilter.options[monthFilter.selectedIndex].text;
-        const selectedYear = yearFilter.value;
-        const reportTitle = `Budget Report: ${selectedMonthName} ${selectedYear}`;
-        const currentMonthYearKey = `${selectedYear}-${monthFilter.value}`;
-        const monthData = allData[currentMonthYearKey] || { income: [], expenses: [] };
-        
-        doc.setFontSize(18);
-        doc.text(reportTitle, 14, 22);
-        doc.setFontSize(11);
-        doc.setTextColor(100);
-        doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 30);
-        
-        let yPos = 40;
-        
-        const addTable = (title, data, headers, yStart) => {
-            if (data.length > 0) {
-                doc.setFontSize(14);
-                doc.text(title, 14, yStart);
-                doc.autoTable({
-                    startY: yStart + 7,
-                    head: [headers],
-                    body: data,
-                    theme: 'striped',
-                    headStyles: { fillColor: title === "Income" ? [42, 157, 143] : [38, 70, 83] }
-                });
-                return doc.lastAutoTable.finalY + 10;
-            }
-            doc.setFontSize(12);
-            doc.text(`No ${title.toLowerCase()} data for this month.`, 14, yStart);
-            return yStart + 10;
-        };
 
-        const incomeData = monthData.income.map(i => [formatDateForDisplay(i.date), i.source, `₹${parseFloat(i.amount).toFixed(2)}`]);
-        yPos = addTable("Income", incomeData, ['Date', 'Source', 'Amount'], yPos);
-        
-        const expenseData = monthData.expenses.map(e => [formatDateForDisplay(e.date), e.description, `₹${parseFloat(e.amount).toFixed(2)}`]);
-        yPos = addTable("Expenses", expenseData, ['Date', 'Description', 'Amount'], yPos);
-        
-        const totalIncome = monthData.income.reduce((sum, item) => sum + parseFloat(item.amount), 0);
-        const totalExpenses = monthData.expenses.reduce((sum, item) => sum + parseFloat(item.amount), 0);
-        const balance = totalIncome - totalExpenses;
-        
-        doc.setFontSize(14);
-        doc.text("Summary", 14, yPos);
-        doc.setFontSize(12);
-        doc.text(`Total Income: ₹${totalIncome.toFixed(2)}`, 14, yPos + 7);
-        doc.text(`Total Expenses: ₹${totalExpenses.toFixed(2)}`, 14, yPos + 14);
-        doc.setFont(undefined, 'bold');
-        doc.text(`Final Balance: ₹${balance.toFixed(2)}`, 14, yPos + 21);
-        
-        doc.save(`Budget_Report_${selectedMonthName}_${selectedYear}.pdf`);
+    // Helper function to convert image to base64
+    const imageToBase64 = (url) => {
+        return fetch(url)
+            .then(response => response.blob())
+            .then(blob => new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.onerror = reject;
+                reader.readAsDataURL(blob);
+            }));
+    };
+
+    async function generatePDF() {
+        try {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            // Your logo and name
+            const logoUrl = 'vector_lecture_design.png';
+            const userName = 'Md Habibur Rahman Mahi';
+
+            const logoBase64 = await imageToBase64(logoUrl);
+
+            // --- PDF Header ---
+            const pageWidth = doc.internal.pageSize.getWidth();
+            
+            doc.setFontSize(22);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor('#2A9D8F'); 
+            doc.text('Infinity Expense Tracker', 14, 22);
+
+            const logoSize = 15;
+            const logoX = pageWidth - 14 - logoSize;
+            doc.addImage(logoBase64, 'PNG', logoX, 15, logoSize, logoSize);
+
+            doc.setFontSize(10);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor('#333333');
+            doc.text(userName, pageWidth - 14 - logoSize - 2, 22, { align: 'right' });
+            doc.text('Report Prepared for:', pageWidth - 14 - logoSize - 2, 18, { align: 'right' });
+            
+            // --- Report Details ---
+            const selectedMonthName = monthFilter.options[monthFilter.selectedIndex].text;
+            const selectedYear = yearFilter.value;
+            const currentMonthYearKey = `${selectedYear}-${monthFilter.value}`;
+            const monthData = allData[currentMonthYearKey] || { income: [], expenses: [] };
+            
+            doc.setFontSize(11);
+            doc.setTextColor(100);
+            const reportSubTitle = `Monthly Report: ${selectedMonthName} ${selectedYear}`;
+            doc.text(reportSubTitle, 14, 32);
+            doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 37);
+
+            let yPos = 50;
+            
+            // --- Tables ---
+            const addTable = (title, data, headers, yStart) => {
+                if (data.length > 0) {
+                    doc.setFontSize(14);
+                    doc.text(title, 14, yStart);
+                    doc.autoTable({
+                        startY: yStart + 7,
+                        head: [headers],
+                        body: data,
+                        theme: 'striped',
+                        headStyles: { fillColor: title === "Income" ? [42, 157, 143] : [38, 70, 83] }
+                    });
+                    return doc.lastAutoTable.finalY + 10;
+                }
+                doc.setFontSize(12);
+                doc.text(`No ${title.toLowerCase()} data for this month.`, 14, yStart);
+                return yStart + 10;
+            };
+
+            const incomeData = monthData.income.map(i => [formatDateForDisplay(i.date), i.source, `₹${parseFloat(i.amount).toFixed(2)}`]);
+            yPos = addTable("Income", incomeData, ['Date', 'Source', 'Amount'], yPos);
+            
+            const expenseData = monthData.expenses.map(e => [formatDateForDisplay(e.date), e.description, `₹${parseFloat(e.amount).toFixed(2)}`]);
+            yPos = addTable("Expenses", expenseData, ['Date', 'Description', 'Amount'], yPos);
+            
+            // --- Summary ---
+            const totalIncome = monthData.income.reduce((sum, item) => sum + parseFloat(item.amount), 0);
+            const totalExpenses = monthData.expenses.reduce((sum, item) => sum + parseFloat(item.amount), 0);
+            const balance = totalIncome - totalExpenses;
+            
+            doc.setFontSize(14);
+            doc.text("Summary", 14, yPos);
+            doc.setFontSize(12);
+            doc.text(`Total Income: ₹${totalIncome.toFixed(2)}`, 14, yPos + 7);
+            doc.text(`Total Expenses: ₹${totalExpenses.toFixed(2)}`, 14, yPos + 14);
+            doc.setFont(undefined, 'bold');
+            doc.text(`Final Balance: ₹${balance.toFixed(2)}`, 14, yPos + 21);
+            
+            doc.save(`Infinity_Report_${selectedMonthName}_${selectedYear}.pdf`);
+        } catch (error) {
+            console.error("Error generating PDF:", error);
+            alert("Could not generate PDF. Make sure 'vector_lecture_design.png' is in the folder.");
+        }
     }
 
     initializeApp();
