@@ -228,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
             doc.setFont(undefined, 'normal');
             doc.setTextColor('#333333');
             doc.text(userName, pageWidth - 14 - logoSize - 2, 22, { align: 'right' });
-            doc.text('Report Prepared for:', pageWidth - 14 - logoSize - 2, 18, { align: 'right' });
+            doc.text('Report Prepared by:', pageWidth - 14 - logoSize - 2, 18, { align: 'right' });
             
             // --- Report Details ---
             const selectedMonthName = monthFilter.options[monthFilter.selectedIndex].text;
