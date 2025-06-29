@@ -235,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
             doc.setFontSize(14); // ফন্ট সাইজ বড় করা হয়েছে
             doc.setFont(undefined, 'bold');
             doc.setTextColor('#E76F51'); // Danger Color (একটি আকর্ষণীয় রঙ)
-            doc.text('Md Habibur Rahman Mahi', textBlockX, 27, { align: 'right' });
+            doc.text('Habibur Rahman Mahi', textBlockX, 27, { align: 'right' });
             
             // আপনার পদবি (রঙিন এবং স্টাইলিশ)
             doc.setFontSize(10);
