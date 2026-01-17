@@ -1,147 +1,1149 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="bn">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Monthly Budget Tracker</title>
+    <title>Infinity-Wallet</title>
     
-    <!-- PWA and Mobile Theme -->
-    <meta name="theme-color" content="#2A9D8F">
-    <link rel="manifest" href="manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- Font Awesome for Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.29/jspdf.plugin.autotable.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        bangla: ['Hind Siliguri', 'sans-serif'],
+                        mono: ['Share Tech Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            900: '#1e3a8a',
+                        },
+                        darkBg: '#0f172a',
+                        cardDark: '#1e293b',
+                    },
+                    boxShadow: {
+                        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.05)',
+                        'glow': '0 0 15px rgba(59, 130, 246, 0.5)',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Hind Siliguri', 'Inter', sans-serif;
+            background-color: #f8fafc;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* --- Realistic ATM Card Design --- */
+        .atm-card {
+            width: 100%;
+            height: 220px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, #0f172a 0%, #334155 100%);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.5);
+            transition: transform 0.4s ease, box-shadow 0.4s ease;
+            perspective: 1000px;
+        }
+
+        .atm-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 30px 60px -12px rgba(15, 23, 42, 0.6);
+        }
+
+        /* Mesh Gradient Background */
+        .atm-bg-mesh {
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: 
+                radial-gradient(at 0% 0%, rgba(124, 58, 237, 0.4) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.4) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.2) 0px, transparent 50%);
+            filter: blur(50px);
+            z-index: 0;
+            animation: meshMove 10s infinite alternate;
+        }
+
+        @keyframes meshMove {
+            0% { transform: translate(0,0); }
+            100% { transform: translate(-5%, -5%); }
+        }
+
+        /* Noise Texture */
+        .atm-noise {
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.05'/%3E%3C/svg%3E");
+            opacity: 0.3;
+            mix-blend-mode: overlay;
+            z-index: 1;
+        }
+
+        /* Glass Overlay */
+        .atm-glass {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.01) 100%);
+            z-index: 2;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 24px;
+        }
+
+        .atm-content {
+            position: relative;
+            z-index: 10;
+            height: 100%;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Realistic Chip */
+        .emv-chip {
+            width: 50px;
+            height: 38px;
+            background: linear-gradient(135deg, #e2e8f0 0%, #94a3b8 50%, #cbd5e1 100%); /* Silver Chip */
+            border-radius: 8px;
+            position: relative;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        .emv-chip::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 1px;
+            height: 100%;
+            background: rgba(0,0,0,0.15);
+            transform: translateX(-50%);
+        }
+        .emv-chip::after {
+            content: '';
+            position: absolute;
+            top: 35%;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: rgba(0,0,0,0.15);
+        }
+        .chip-lines {
+            position: absolute;
+            top: 65%;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: rgba(0,0,0,0.15);
+        }
+
+        .card-number {
+            font-family: 'Share Tech Mono', monospace;
+            letter-spacing: 3px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        /* --- Transaction Card Improvements --- */
+        .trans-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .trans-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+            border-color: #cbd5e1;
+        }
+        .icon-box {
+            box-shadow: inset 0 2px 4px rgba(255,255,255,0.6), 0 4px 6px -1px rgba(0,0,0,0.05);
+        }
+
+        /* Floating Action Button */
+        .fab {
+            box-shadow: 0 8px 30px rgba(59, 130, 246, 0.4);
+            transition: transform 0.2s;
+        }
+        .fab:active { transform: scale(0.9); }
+
+        @media print {
+            .no-print { display: none !important; }
+        }
+    </style>
 </head>
-<body>
-    <header>
-        <div class="logo-container">
-            <img src="logo.svg" alt="Budget Tracker Logo" class="logo">
-            <h1>Budget Tracker</h1>
-        </div>
-        <div class="theme-switcher">
-            <label class="switch">
-                <input type="checkbox" id="darkModeToggle">
-                <span class="slider round"></span>
-            </label>
-            <span class="theme-icon"><i class="fas fa-moon"></i></span>
+<body class="text-slate-800 antialiased min-h-screen pb-24">
+
+    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-slate-200/60">
+        <div class="max-w-3xl mx-auto px-5 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center text-white shadow-lg shadow-slate-500/30">
+                    <i class="fa-solid fa-infinity text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700 leading-tight" data-i18n="appTitle">ইনফিনিটি-ওয়ালেট</h1>
+                    <p class="text-[11px] text-slate-500 font-medium tracking-wide" id="currentDateDisplay">...</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2">
+                <button onclick="toggleLanguage()" class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-xs font-bold text-slate-600 hover:bg-slate-200 transition-colors">
+                    <i class="fa-solid fa-language text-slate-800"></i>
+                    <span id="langLabel">EN</span>
+                </button>
+
+                <button onclick="toggleDarkMode()" class="w-9 h-9 rounded-full bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-200 transition-all">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+            </div>
         </div>
     </header>
 
-    <main>
-        <section class="entry-section">
-            <div class="form-container card" id="income-form-container">
-                <h2><i class="fas fa-hand-holding-usd"></i> Add Income</h2>
-                <form id="incomeForm">
-                    <div>
-                        <label for="incomeSource">Source:</label>
-                        <input type="text" id="incomeSource" placeholder="e.g., Salary" required>
-                    </div>
-                    <div>
-                        <label for="incomeAmount">Amount:</label>
-                        <input type="number" id="incomeAmount" placeholder="e.g., 1500" min="0.01" step="0.01" required>
-                    </div>
-                    <div>
-                        <label for="incomeDate">Date:</label>
-                        <input type="date" id="incomeDate" required>
-                    </div>
-                    <button type="submit"><i class="fas fa-plus-circle"></i> Add Income</button>
-                </form>
+    <main class="max-w-3xl mx-auto px-5 py-6 space-y-8" id="printableArea">
+        
+        <section class="flex gap-2 items-center justify-between no-print flex-wrap sm:flex-nowrap">
+            <div class="relative flex-1 group min-w-[150px]">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400">
+                    <i class="fa-regular fa-calendar"></i>
+                </div>
+                <input type="month" id="monthPicker" class="w-full bg-white border border-slate-200 rounded-xl pl-10 pr-4 py-2.5 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500 transition-all shadow-sm" onchange="filterData()">
             </div>
+            
+            <button onclick="resetDateFilter()" class="bg-white border border-slate-200 p-2.5 rounded-xl text-slate-500 hover:text-slate-800 hover:border-slate-300 shadow-sm transition-all tooltip" title="Reset">
+                <i class="fa-solid fa-rotate-left"></i>
+            </button>
+            
+            <div class="flex gap-2">
+                <button onclick="printReport()" class="bg-slate-800 text-white p-2.5 px-4 rounded-xl shadow-lg shadow-slate-500/20 hover:bg-slate-900 font-medium flex items-center gap-2 text-sm transition-all">
+                    <i class="fa-solid fa-file-pdf"></i> <span class="hidden sm:inline" data-i18n="report">রিপোর্ট</span>
+                </button>
 
-            <div class="form-container card" id="expense-form-container">
-                <h2><i class="fas fa-receipt"></i> Add Expense</h2>
-                <form id="expenseForm">
-                    <div>
-                        <label for="expenseDescription">Description:</label>
-                        <input type="text" id="expenseDescription" placeholder="e.g., Groceries" required>
-                    </div>
-                    <div>
-                        <label for="expenseAmount">Amount:</label>
-                        <input type="number" id="expenseAmount" placeholder="e.g., 75.50" min="0.01" step="0.01" required>
-                    </div>
-                    <div>
-                        <label for="expenseDate">Date:</label>
-                        <input type="date" id="expenseDate" required>
-                    </div>
-                    <button type="submit"><i class="fas fa-plus-circle"></i> Add Expense</button>
-                </form>
+                <button onclick="openPdfModal()" class="bg-purple-600 text-white p-2.5 px-4 rounded-xl shadow-lg shadow-purple-500/20 hover:bg-purple-700 font-medium flex items-center gap-2 text-sm transition-all">
+                    <i class="fa-solid fa-file-arrow-down"></i> <span class="hidden sm:inline">PDF</span>
+                </button>
             </div>
         </section>
 
-        <section class="filter-summary-section card">
-            <div class="filter-controls">
-                <h2><i class="fas fa-filter"></i> Filter & Summary</h2>
-                <div>
-                    <label for="monthFilter">Month:</label>
-                    <select id="monthFilter">
-                        <option value="0">January</option><option value="1">February</option><option value="2">March</option><option value="3">April</option><option value="4">May</option><option value="5">June</option><option value="6">July</option><option value="7">August</option><option value="8">September</option><option value="9">October</option><option value="10">November</option><option value="11">December</option>
-                    </select>
+        <section class="atm-card">
+            <div class="atm-bg-mesh"></div>
+            <div class="atm-noise"></div>
+            <div class="atm-glass"></div>
+            
+            <div class="atm-content">
+                <div class="flex justify-between items-start">
+                    <div class="emv-chip">
+                        <div class="chip-lines"></div>
+                    </div>
+                    <div class="text-white/80 text-2xl">
+                        <i class="fa-solid fa-wifi rotate-90"></i>
+                    </div>
                 </div>
-                <div>
-                    <label for="yearFilter">Year:</label>
-                    <input type="number" id="yearFilter" min="2000" max="2100">
+                
+                <div class="mt-2">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-slate-300 text-[10px] font-bold tracking-[0.2em] uppercase" data-i18n="currentBalance">CURRENT BALANCE</span>
+                    </div>
+                    <h2 class="text-3xl sm:text-4xl text-white font-mono font-bold tracking-tight drop-shadow-md" id="totalBalance">৳ 0.00</h2>
+                </div>
+
+                <div class="flex justify-between items-end">
+                    <div>
+                        <div class="flex gap-4 items-center mb-1">
+                            <span class="card-number text-white/90 text-sm sm:text-base">**** **** **** 8888</span>
+                        </div>
+                        <p class="text-slate-300 text-[10px] uppercase font-bold tracking-wider">VALID THRU 12/30</p>
+                        <p class="text-white text-xs sm:text-sm font-semibold tracking-wide mt-0.5 uppercase">INFINITY MEMBER</p>
+                    </div>
+                    
+                    <div class="italic font-black text-2xl text-white opacity-90 tracking-tighter">
+                        <span class="relative z-10">VISA</span>
+                        <div class="h-1 w-full bg-yellow-400 -mt-2 opacity-80"></div>
+                    </div>
                 </div>
             </div>
-            <div class="summary">
-                <p>Total Income: <span id="totalIncome">₹0.00</span></p>
-                <p>Total Expenses: <span id="totalExpenses">₹0.00</span></p>
-                <h3>Balance: <span id="currentBalance">₹0.00</span></h3>
-            </div>
-            <button id="generatePdfBtn"><i class="fas fa-file-pdf"></i> PDF Report</button>
         </section>
 
-        <section class="data-display-section">
-            <div class="table-container card">
-                <h3><i class="fas fa-arrow-down"></i> Monthly Income</h3>
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr><th>Date</th><th>Source</th><th>Amount</th><th>Actions</th></tr>
-                        </thead>
-                        <tbody id="incomeTableBody"></tbody>
-                    </table>
+        <section class="grid grid-cols-2 gap-4">
+            <div class="bg-white p-5 rounded-2xl shadow-soft border border-slate-100 flex flex-col relative overflow-hidden group hover:border-green-200 transition-colors">
+                <div class="absolute right-0 top-0 w-24 h-24 bg-gradient-to-br from-green-50 to-transparent rounded-bl-full -mr-6 -mt-6 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                <div class="flex items-center gap-2 mb-3 relative z-10">
+                    <div class="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-xs shadow-sm"><i class="fa-solid fa-arrow-down"></i></div>
+                    <p class="text-slate-500 text-xs font-bold uppercase tracking-wide" data-i18n="totalIncome">মোট আয়</p>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800 relative z-10" id="totalIncome">৳ ০.০০</h3>
+            </div>
+            
+            <div class="bg-white p-5 rounded-2xl shadow-soft border border-slate-100 flex flex-col relative overflow-hidden group hover:border-red-200 transition-colors">
+                <div class="absolute right-0 top-0 w-24 h-24 bg-gradient-to-br from-red-50 to-transparent rounded-bl-full -mr-6 -mt-6 opacity-50 group-hover:opacity-100 transition-opacity"></div>
+                <div class="flex items-center gap-2 mb-3 relative z-10">
+                    <div class="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-xs shadow-sm"><i class="fa-solid fa-arrow-up"></i></div>
+                    <p class="text-slate-500 text-xs font-bold uppercase tracking-wide" data-i18n="totalExpense">মোট খরচ</p>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800 relative z-10" id="totalExpense">৳ ০.০০</h3>
+            </div>
+            
+            <div class="bg-white p-5 rounded-2xl shadow-soft border border-slate-100 flex flex-col relative overflow-hidden hover:border-orange-200 transition-colors">
+                <div class="absolute right-0 top-0 w-20 h-20 bg-orange-50/80 rounded-bl-full -mr-5 -mt-5"></div>
+                <p class="text-slate-500 text-xs font-bold uppercase mb-1 z-10" data-i18n="due">পাওনা</p>
+                <h3 class="text-lg font-bold text-orange-600 z-10" id="totalGiven">৳ ০.০০</h3>
+                <p class="text-[10px] text-slate-400 mt-1 z-10" data-i18n="willGet">আমি পাবো</p>
+            </div>
+            
+            <div class="bg-white p-5 rounded-2xl shadow-soft border border-slate-100 flex flex-col relative overflow-hidden hover:border-purple-200 transition-colors">
+                <div class="absolute right-0 top-0 w-20 h-20 bg-purple-50/80 rounded-bl-full -mr-5 -mt-5"></div>
+                <p class="text-slate-500 text-xs font-bold uppercase mb-1 z-10" data-i18n="loan">দেনা</p>
+                <h3 class="text-lg font-bold text-purple-600 z-10" id="totalTaken">৳ ০.০০</h3>
+                <p class="text-[10px] text-slate-400 mt-1 z-10" data-i18n="willGive">আমি দিবো</p>
+            </div>
+        </section>
+
+        <section>
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+                    <i class="fa-solid fa-list-ul text-slate-600 text-sm"></i> <span data-i18n="transactions">লেনদেন সমূহ</span>
+                </h3>
+                <div class="flex gap-2 no-print bg-slate-100 p-1 rounded-full">
+                    <button onclick="filterType('all')" class="px-4 py-1.5 text-xs font-bold rounded-full transition-all shadow-sm bg-white text-slate-800" id="btn-all" data-i18n="all">সব</button>
+                    <button onclick="filterType('loan')" class="px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-700" id="btn-loan" data-i18n="loan">লোন</button>
                 </div>
             </div>
 
-            <div class="table-container card">
-                <h3><i class="fas fa-arrow-up"></i> Monthly Expenses</h3>
-                <div class="table-wrapper">
-                    <table>
-                        <thead>
-                            <tr><th>Date</th><th>Description</th><th>Amount</th><th>Actions</th></tr>
-                        </thead>
-                        <tbody id="expenseTableBody"></tbody>
-                    </table>
-                </div>
+            <div class="mb-5 relative no-print group">
+                <i class="fa-solid fa-search absolute left-4 top-3.5 text-slate-400 text-sm group-focus-within:text-slate-500 transition-colors"></i>
+                <input type="text" id="searchInput" onkeyup="filterData()" class="w-full pl-10 pr-4 py-3 bg-white border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500 transition-all shadow-sm placeholder:text-slate-400" data-i18n-placeholder="searchPlaceholder" placeholder="নাম বা ক্যাটাগরি দিয়ে খুঁজুন...">
             </div>
+
+            <div id="transactionList" class="space-y-4">
+                </div>
         </section>
     </main>
 
-    <footer>
-        <a href="developer.html" class="footer-profile-link">
-            <img src="vector_lecture_design.png" alt="Developer: Md Habibur Rahman Mahi" class="profile-pic">
-            <span class="profile-text">Developer Profile</span>
-        </a>
-    </footer>
+    <button onclick="openModal()" class="fab fixed bottom-6 right-6 w-14 h-14 bg-slate-900 text-white rounded-full flex items-center justify-center text-2xl z-50 hover:bg-slate-800 no-print">
+        <i class="fa-solid fa-plus"></i>
+    </button>
 
-    <!-- External Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
-    
-    <!-- Main App Script -->
-    <script src="script.js"></script>
+    <div id="transactionModal" class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-slate-900/60 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white w-full sm:max-w-md sm:rounded-3xl rounded-t-3xl shadow-2xl overflow-hidden transform translate-y-20 sm:translate-y-0 scale-95 transition-transform duration-300" id="modalContent">
+            <div class="bg-slate-50/50 px-6 py-4 border-b border-slate-100 flex justify-between items-center">
+                <h3 class="font-bold text-lg text-slate-800" id="modalTitle" data-i18n="newTransaction">নতুন লেনদেন</h3>
+                <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-500 hover:bg-red-50 hover:text-red-500 flex items-center justify-center transition-colors"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <form id="transactionForm" onsubmit="saveTransaction(event)" class="p-6 space-y-5">
+                <input type="hidden" id="editId">
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="cursor-pointer group">
+                        <input type="radio" name="type" value="income" class="peer sr-only" onchange="toggleLoanFields()" checked>
+                        <div class="p-3 text-center rounded-xl border border-slate-200 peer-checked:bg-green-50 peer-checked:border-green-500/50 peer-checked:text-green-700 text-slate-500 transition-all hover:bg-slate-50">
+                            <i class="fa-solid fa-arrow-down mb-1.5 block text-lg"></i> <span class="text-xs font-bold" data-i18n="income">আয়</span>
+                        </div>
+                    </label>
+                    <label class="cursor-pointer group">
+                        <input type="radio" name="type" value="expense" class="peer sr-only" onchange="toggleLoanFields()">
+                        <div class="p-3 text-center rounded-xl border border-slate-200 peer-checked:bg-red-50 peer-checked:border-red-500/50 peer-checked:text-red-700 text-slate-500 transition-all hover:bg-slate-50">
+                            <i class="fa-solid fa-arrow-up mb-1.5 block text-lg"></i> <span class="text-xs font-bold" data-i18n="expense">খরচ</span>
+                        </div>
+                    </label>
+                    <label class="cursor-pointer group">
+                        <input type="radio" name="type" value="loan_given" class="peer sr-only" onchange="toggleLoanFields()">
+                        <div class="p-3 text-center rounded-xl border border-slate-200 peer-checked:bg-orange-50 peer-checked:border-orange-500/50 peer-checked:text-orange-700 text-slate-500 transition-all hover:bg-slate-50">
+                            <i class="fa-solid fa-hand-holding-dollar mb-1.5 block text-lg"></i> <span class="text-xs font-bold" data-i18n="lend">ধার দেওয়া</span>
+                        </div>
+                    </label>
+                    <label class="cursor-pointer group">
+                        <input type="radio" name="type" value="loan_taken" class="peer sr-only" onchange="toggleLoanFields()">
+                        <div class="p-3 text-center rounded-xl border border-slate-200 peer-checked:bg-purple-50 peer-checked:border-purple-500/50 peer-checked:text-purple-700 text-slate-500 transition-all hover:bg-slate-50">
+                            <i class="fa-solid fa-hand-holding mb-1.5 block text-lg"></i> <span class="text-xs font-bold" data-i18n="borrow">ধার নেওয়া</span>
+                        </div>
+                    </label>
+                </div>
 
-    <!-- Service Worker Registration -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide" data-i18n="amount">টাকার পরিমাণ</label>
+                    <div class="relative group">
+                        <span class="absolute left-4 top-3 text-slate-400 font-bold group-focus-within:text-slate-600 transition-colors">৳</span>
+                        <input type="number" id="amount" step="any" required class="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500 outline-none font-mono font-bold text-xl text-slate-700 transition-all placeholder:text-slate-300" placeholder="0.00">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide" data-i18n="date">তারিখ</label>
+                        <input type="date" id="date" required class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500 outline-none text-sm font-medium text-slate-700">
+                    </div>
+                    
+                    <div id="categoryGroup">
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide" data-i18n="category">ক্যাটাগরি</label>
+                        <select id="category" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500 outline-none text-sm font-medium text-slate-700 appearance-none">
+                            <option value="Food" data-i18n="catFood">খাবার</option>
+                            <option value="Transport" data-i18n="catTransport">যাতায়াত</option>
+                            <option value="Rent" data-i18n="catRent">বাড়ি ভাড়া</option>
+                            <option value="Bills" data-i18n="catBills">বিল</option>
+                            <option value="Shopping" data-i18n="catShopping">কেনাকাটা</option>
+                            <option value="Medical" data-i18n="catMedical">চিকিৎসা</option>
+                            <option value="Salary" data-i18n="catSalary">বেতন</option>
+                            <option value="Business" data-i18n="catBusiness">ব্যবসা</option>
+                            <option value="Others" data-i18n="catOthers">অন্যান্য</option>
+                        </select>
+                    </div>
+
+                    <div id="personGroup" class="hidden">
+                        <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide" data-i18n="person">ব্যক্তির নাম</label>
+                        <input type="text" id="personName" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500 outline-none text-sm" placeholder="Name...">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wide" data-i18n="note">নোট (অপশনাল)</label>
+                    <input type="text" id="note" class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-slate-500/20 focus:border-slate-500 outline-none text-sm transition-all" placeholder="...">
+                </div>
+
+                <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3.5 rounded-xl shadow-lg shadow-slate-500/30 transition-all transform active:scale-[0.98] flex justify-center items-center gap-2">
+                    <i class="fa-solid fa-save"></i> <span data-i18n="save">সেভ করুন</span>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div id="pdfModal" class="fixed inset-0 z-[70] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white w-full max-w-sm rounded-2xl shadow-2xl p-6 transform scale-95 transition-transform duration-300" id="pdfModalContent">
+            <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-file-pdf text-purple-600"></i> Download PDF Report
+            </h3>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase">From Date</label>
+                    <input type="date" id="pdfStartDate" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-purple-500 outline-none text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 mb-1.5 uppercase">To Date</label>
+                    <input type="date" id="pdfEndDate" class="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:border-purple-500 outline-none text-sm">
+                </div>
+                
+                <div class="pt-2 flex gap-3">
+                    <button onclick="closePdfModal()" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50">Close</button>
+                    <button onclick="generateCustomPDF()" class="flex-1 py-2.5 rounded-xl bg-purple-600 text-white font-bold text-sm hover:bg-purple-700 shadow-lg shadow-purple-500/30">
+                        Download
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/service-worker.js')
-                    .then(reg => console.log('Service Worker: Registered'))
-                    .catch(err => console.log(`Service Worker: Error: ${err}`));
+        // --- Translations Configuration ---
+        const translations = {
+            bn: {
+                appTitle: "ইনফিনিটি-ওয়ালেট",
+                report: "রিপোর্ট",
+                currentBalance: "বর্তমান ব্যালেন্স",
+                totalIncome: "মোট আয়",
+                totalExpense: "মোট খরচ",
+                due: "পাওনা",
+                loan: "দেনা",
+                willGet: "আমি পাবো",
+                willGive: "আমি দিবো",
+                transactions: "লেনদেন সমূহ",
+                all: "সব",
+                income: "আয়",
+                expense: "খরচ",
+                lend: "ধার দেওয়া",
+                borrow: "ধার নেওয়া",
+                amount: "টাকার পরিমাণ",
+                date: "তারিখ",
+                category: "ক্যাটাগরি",
+                person: "ব্যক্তির নাম",
+                note: "নোট (অপশনাল)",
+                save: "সেভ করুন",
+                searchPlaceholder: "নাম বা ক্যাটাগরি দিয়ে খুঁজুন...",
+                newTransaction: "নতুন লেনদেন",
+                editTransaction: "লেনদেন এডিট করুন",
+                noData: "কোনো লেনদেন পাওয়া যায়নি",
+                // Categories
+                catFood: "খাবার",
+                catTransport: "যাতায়াত",
+                catRent: "বাড়ি ভাড়া",
+                catBills: "বিল",
+                catShopping: "কেনাকাটা",
+                catMedical: "চিকিৎসা",
+                catSalary: "বেতন",
+                catBusiness: "ব্যবসা",
+                catOthers: "অন্যান্য",
+                // Alerts
+                successUpdate: "আপডেট সম্পন্ন!",
+                successAdd: "নতুন এন্ট্রি যোগ হয়েছে!",
+                areYouSure: "আপনি কি নিশ্চিত?",
+                cantRevert: "এটি ফিরে পাওয়া যাবে না!",
+                yesDelete: "হ্যাঁ, ডিলিট করুন",
+                no: "না",
+                deleted: "ডিলিট হয়েছে!",
+                settleConfirm: "নিশ্চিত করুন?",
+                settleText: "এর সাথে লেনদেন নিষ্পত্তি করতে চান?",
+                yesSettle: "হ্যাঁ, সম্পন্ন হয়েছে",
+                settled: "সফল! লেনদেন নিষ্পত্তি হয়েছে।",
+                settledBadge: "পরিশোধিত",
+                activeBadge: "অ্যাক্টিভ",
+                langBtn: "EN"
+            },
+            en: {
+                appTitle: "Infinity-Wallet",
+                report: "Report",
+                currentBalance: "Current Balance",
+                totalIncome: "Total Income",
+                totalExpense: "Total Expense",
+                due: "Due",
+                loan: "Loan",
+                willGet: "Receivable",
+                willGive: "Payable",
+                transactions: "Transactions",
+                all: "All",
+                income: "Income",
+                expense: "Expense",
+                lend: "Lend",
+                borrow: "Borrow",
+                amount: "Amount",
+                date: "Date",
+                category: "Category",
+                person: "Person Name",
+                note: "Note (Optional)",
+                save: "Save Entry",
+                searchPlaceholder: "Search by name or category...",
+                newTransaction: "New Transaction",
+                editTransaction: "Edit Transaction",
+                noData: "No transactions found",
+                // Categories
+                catFood: "Food",
+                catTransport: "Transport",
+                catRent: "Rent",
+                catBills: "Bills",
+                catShopping: "Shopping",
+                catMedical: "Medical",
+                catSalary: "Salary",
+                catBusiness: "Business",
+                catOthers: "Others",
+                // Alerts
+                successUpdate: "Updated Successfully!",
+                successAdd: "New Entry Added!",
+                areYouSure: "Are you sure?",
+                cantRevert: "You won't be able to revert this!",
+                yesDelete: "Yes, delete it!",
+                no: "No",
+                deleted: "Deleted!",
+                settleConfirm: "Confirm Settlement?",
+                settleText: "Do you want to settle with",
+                yesSettle: "Yes, Settled",
+                settled: "Success! Transaction settled.",
+                settledBadge: "Settled",
+                activeBadge: "Active",
+                langBtn: "বাংলা"
+            }
+        };
+
+        let currentLang = 'bn'; // Default Language
+
+        // --- State Management ---
+        const STORAGE_KEY = 'infinity_wallet_db';
+        let transactions = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        
+        let currentFilterType = 'all';
+        let currentDateFilter = new Date().toISOString().slice(0, 7);
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('monthPicker').value = currentDateFilter;
+            document.getElementById('date').valueAsDate = new Date();
+            updateLanguage(); 
+            updateDateDisplay();
+            renderDashboard();
+            renderTransactions();
+        });
+
+        // --- Language Functions ---
+        function toggleLanguage() {
+            currentLang = currentLang === 'bn' ? 'en' : 'bn';
+            updateLanguage();
+            updateDateDisplay();
+            renderDashboard();
+            renderTransactions();
+            
+            const options = document.querySelectorAll('#category option');
+            options.forEach(opt => {
+                const key = opt.getAttribute('data-i18n');
+                if(key) opt.textContent = translations[currentLang][key];
             });
         }
+
+        function updateLanguage() {
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                if (translations[currentLang][key]) {
+                    el.textContent = translations[currentLang][key];
+                }
+            });
+
+            document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+                const key = el.getAttribute('data-i18n-placeholder');
+                if (translations[currentLang][key]) {
+                    el.placeholder = translations[currentLang][key];
+                }
+            });
+
+            document.getElementById('langLabel').textContent = translations[currentLang].langBtn;
+            
+            if (currentLang === 'en') {
+                document.body.classList.remove('font-bangla');
+                document.body.classList.add('font-sans');
+            } else {
+                document.body.classList.remove('font-sans');
+                document.body.classList.add('font-bangla');
+            }
+        }
+
+        function t(key) {
+            return translations[currentLang][key] || key;
+        }
+
+        // --- Core Functions ---
+
+        function updateDateDisplay() {
+            const date = new Date();
+            const locale = currentLang === 'bn' ? 'bn-BD' : 'en-US';
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDateDisplay').textContent = date.toLocaleDateString(locale, options);
+        }
+
+        function saveTransaction(e) {
+            e.preventDefault();
+            
+            const type = document.querySelector('input[name="type"]:checked').value;
+            const amount = parseFloat(document.getElementById('amount').value);
+            const date = document.getElementById('date').value;
+            const note = document.getElementById('note').value;
+            const id = document.getElementById('editId').value || Date.now().toString();
+            
+            let category = document.getElementById('category').value; 
+            let person = '';
+            let status = 'active';
+
+            if (type.includes('loan')) {
+                person = document.getElementById('personName').value;
+                category = 'Loan'; 
+                if(!person) {
+                    Swal.fire('Error', 'Please enter person name', 'error');
+                    return;
+                }
+            }
+
+            const transaction = { id, type, amount, date, category, note, person, status };
+            const existingIndex = transactions.findIndex(t => t.id === id);
+            
+            if (existingIndex > -1) {
+                transaction.status = transactions[existingIndex].status; 
+                transactions[existingIndex] = transaction;
+                showToast('success', t('successUpdate'));
+            } else {
+                transactions.push(transaction);
+                showToast('success', t('successAdd'));
+            }
+
+            saveToLocal();
+            closeModal();
+            renderDashboard();
+            renderTransactions();
+        }
+
+        function showToast(icon, title) {
+            Swal.fire({
+                icon: icon,
+                title: title,
+                showConfirmButton: false,
+                timer: 1500,
+                toast: true,
+                position: 'top-end'
+            });
+        }
+
+        function deleteTransaction(id) {
+            Swal.fire({
+                title: t('areYouSure'),
+                text: t('cantRevert'),
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ef4444',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: t('yesDelete'),
+                cancelButtonText: t('no')
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    transactions = transactions.filter(t => t.id !== id);
+                    saveToLocal();
+                    renderDashboard();
+                    renderTransactions();
+                    Swal.fire(t('deleted'), '', 'success');
+                }
+            })
+        }
+
+        function editTransaction(id) {
+            const tr = transactions.find(t => t.id === id);
+            if (!tr) return;
+
+            document.getElementById('editId').value = tr.id;
+            document.getElementById('amount').value = tr.amount;
+            document.getElementById('date').value = tr.date;
+            document.getElementById('note').value = tr.note;
+            
+            const radio = document.querySelector(`input[name="type"][value="${tr.type}"]`);
+            if (radio) {
+                radio.checked = true;
+                toggleLoanFields();
+            }
+
+            if (tr.type.includes('loan')) {
+                document.getElementById('personName').value = tr.person;
+            } else {
+                document.getElementById('category').value = tr.category;
+            }
+
+            document.getElementById('modalTitle').textContent = t('editTransaction');
+            openModal();
+        }
+
+        function settleLoan(id) {
+            const tr = transactions.find(t => t.id === id);
+            if (!tr) return;
+            
+            Swal.fire({
+                title: t('settleConfirm'),
+                text: `${t('settleText')} ${tr.person}? (${tr.amount})`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: t('yesSettle'),
+                cancelButtonText: t('no')
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    tr.status = 'settled';
+                    saveToLocal();
+                    renderDashboard();
+                    renderTransactions();
+                    Swal.fire('Done', t('settled'), 'success');
+                }
+            });
+        }
+
+        // --- Helpers ---
+        function saveToLocal() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(transactions));
+        }
+
+        function formatCurrency(amount) {
+            const locale = currentLang === 'bn' ? 'bn-BD' : 'en-US';
+            const currency = currentLang === 'bn' ? '৳ ' : '৳ ';
+            return currency + amount.toLocaleString(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        }
+
+        function toggleLoanFields() {
+            const type = document.querySelector('input[name="type"]:checked').value;
+            const categoryGroup = document.getElementById('categoryGroup');
+            const personGroup = document.getElementById('personGroup');
+
+            if (type.includes('loan')) {
+                categoryGroup.classList.add('hidden');
+                personGroup.classList.remove('hidden');
+            } else {
+                categoryGroup.classList.remove('hidden');
+                personGroup.classList.add('hidden');
+            }
+        }
+
+        // --- Filters & Render ---
+        function filterData() {
+            currentDateFilter = document.getElementById('monthPicker').value;
+            renderDashboard();
+            renderTransactions();
+        }
+
+        function resetDateFilter() {
+            document.getElementById('monthPicker').value = '';
+            currentDateFilter = '';
+            renderDashboard();
+            renderTransactions();
+        }
+
+        function filterType(type) {
+            currentFilterType = type;
+            const btnAll = document.getElementById('btn-all');
+            const btnLoan = document.getElementById('btn-loan');
+            
+            if (type === 'all') {
+                btnAll.className = "px-4 py-1.5 text-xs font-bold rounded-full transition-all shadow-sm bg-white text-slate-800 ring-1 ring-slate-200";
+                btnLoan.className = "px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-700";
+            } else {
+                btnAll.className = "px-4 py-1.5 text-xs font-bold rounded-full text-slate-500 hover:text-slate-700";
+                btnLoan.className = "px-4 py-1.5 text-xs font-bold rounded-full transition-all shadow-sm bg-white text-slate-800 ring-1 ring-slate-200";
+            }
+
+            renderTransactions();
+        }
+
+        function getFilteredTransactions() {
+            const search = document.getElementById('searchInput').value.toLowerCase();
+            const selectedMonth = document.getElementById('monthPicker').value;
+
+            return transactions.filter(tr => {
+                let dateMatch = true;
+                if (selectedMonth) dateMatch = tr.date.startsWith(selectedMonth);
+
+                const searchMatch = (tr.note && tr.note.toLowerCase().includes(search)) || 
+                                    (tr.category && tr.category.toLowerCase().includes(search)) || 
+                                    (tr.person && tr.person.toLowerCase().includes(search));
+
+                let typeMatch = true;
+                if (currentFilterType === 'loan') typeMatch = tr.type.includes('loan');
+
+                return dateMatch && searchMatch && typeMatch;
+            }).sort((a, b) => new Date(b.date) - new Date(a.date));
+        }
+
+        function renderDashboard() {
+            const selectedMonth = document.getElementById('monthPicker').value;
+            let inc = 0, exp = 0, given = 0, taken = 0;
+            let globalBalance = 0;
+
+            transactions.forEach(tr => {
+                const inDate = selectedMonth ? tr.date.startsWith(selectedMonth) : true;
+                if (tr.type === 'income' && inDate) inc += tr.amount;
+                if (tr.type === 'expense' && inDate) exp += tr.amount;
+                if (tr.status === 'active') {
+                    if (tr.type === 'loan_given') given += tr.amount;
+                    if (tr.type === 'loan_taken') taken += tr.amount;
+                }
+
+                if (tr.type === 'income') globalBalance += tr.amount;
+                if (tr.type === 'expense') globalBalance -= tr.amount;
+                if (tr.type === 'loan_taken') {
+                    globalBalance += tr.amount;
+                    if (tr.status === 'settled') globalBalance -= tr.amount;
+                }
+                if (tr.type === 'loan_given') {
+                    globalBalance -= tr.amount;
+                    if (tr.status === 'settled') globalBalance += tr.amount;
+                }
+            });
+
+            document.getElementById('totalBalance').textContent = formatCurrency(globalBalance);
+            document.getElementById('totalIncome').textContent = formatCurrency(inc);
+            document.getElementById('totalExpense').textContent = formatCurrency(exp);
+            document.getElementById('totalGiven').textContent = formatCurrency(given);
+            document.getElementById('totalTaken').textContent = formatCurrency(taken);
+        }
+
+        function renderTransactions() {
+            const list = document.getElementById('transactionList');
+            const data = getFilteredTransactions();
+            list.innerHTML = '';
+
+            if (data.length === 0) {
+                list.innerHTML = `
+                    <div class="text-center py-12">
+                        <div class="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3 text-slate-300 text-2xl">
+                             <i class="fa-solid fa-infinity"></i>
+                        </div>
+                        <p class="text-slate-400 text-sm font-medium">${t('noData')}</p>
+                    </div>`;
+                return;
+            }
+
+            data.forEach(tr => {
+                let iconClass, bgGradient, typeLabel, amountSign, textColor;
+                
+                let catDisplay = tr.category === 'Loan' ? tr.person : (translations[currentLang]['cat'+tr.category] || tr.category);
+
+                switch(tr.type) {
+                    case 'income':
+                        iconClass = 'fa-arrow-down';
+                        bgGradient = 'from-green-500 to-emerald-500';
+                        typeLabel = t('income');
+                        amountSign = '+';
+                        textColor = 'text-green-600';
+                        break;
+                    case 'expense':
+                        iconClass = 'fa-arrow-up';
+                        bgGradient = 'from-red-500 to-rose-500';
+                        typeLabel = t('expense');
+                        amountSign = '-';
+                        textColor = 'text-slate-800';
+                        break;
+                    case 'loan_given':
+                        iconClass = 'fa-hand-holding-dollar';
+                        bgGradient = 'from-orange-400 to-amber-500';
+                        typeLabel = t('lend');
+                        amountSign = '-';
+                        textColor = 'text-orange-600';
+                        break;
+                    case 'loan_taken':
+                        iconClass = 'fa-hand-holding';
+                        bgGradient = 'from-purple-500 to-violet-500';
+                        typeLabel = t('borrow');
+                        amountSign = '+';
+                        textColor = 'text-purple-600';
+                        break;
+                }
+
+                const isLoan = tr.type.includes('loan');
+                const isSettled = tr.status === 'settled';
+                const opacityClass = isSettled ? 'opacity-60 grayscale-[0.5]' : '';
+                
+                const dateObj = new Date(tr.date);
+                const locale = currentLang === 'bn' ? 'bn-BD' : 'en-US';
+                const dateStr = dateObj.toLocaleDateString(locale, { day: 'numeric', month: 'short' });
+
+                const badgeText = isSettled ? t('settledBadge') : t('activeBadge');
+                const statusBadge = isLoan 
+                    ? `<span class="text-[10px] px-2 py-0.5 rounded-md font-bold ${isSettled ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600'}">
+                        ${badgeText}
+                       </span>` 
+                    : '';
+
+                const html = `
+                    <div class="trans-card group bg-white p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center gap-4 ${opacityClass} relative overflow-hidden">
+                         <div class="absolute left-0 top-0 bottom-0 w-1 ${tr.type.includes('income') ? 'bg-green-500' : (tr.type.includes('expense') ? 'bg-red-500' : 'bg-blue-500')}"></div>
+                        
+                        <div class="flex items-center gap-4 flex-1 w-full pl-2">
+                            <div class="icon-box w-12 h-12 rounded-2xl bg-gradient-to-br ${bgGradient} flex items-center justify-center text-white text-lg shadow-md">
+                                <i class="fa-solid ${iconClass}"></i>
+                            </div>
+                            
+                            <div class="flex-1 min-w-0">
+                                <div class="flex justify-between items-start">
+                                    <div>
+                                        <h4 class="font-bold text-slate-800 text-base truncate">${catDisplay}</h4>
+                                        <p class="text-xs text-slate-500 mt-1 font-medium">${tr.note || typeLabel} • ${dateStr}</p>
+                                    </div>
+                                    <div class="text-right flex-shrink-0">
+                                        <span class="font-bold font-mono text-lg ${textColor}">
+                                            ${amountSign} ${formatCurrency(tr.amount).replace('৳ ', '')}
+                                        </span>
+                                        <div class="mt-1 flex justify-end gap-2">${statusBadge}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-2 mt-2 sm:mt-0 sm:ml-auto sm:opacity-0 sm:group-hover:opacity-100 transition-all duration-200 no-print sm:translate-x-4 sm:group-hover:translate-x-0">
+                            ${isLoan && !isSettled ? `<button onclick="settleLoan('${tr.id}')" class="w-9 h-9 rounded-full bg-green-50 text-green-600 hover:bg-green-500 hover:text-white flex items-center justify-center shadow-sm transition-all"><i class="fa-solid fa-check"></i></button>` : ''}
+                            <button onclick="editTransaction('${tr.id}')" class="w-9 h-9 rounded-full bg-blue-50 text-blue-600 hover:bg-blue-500 hover:text-white flex items-center justify-center shadow-sm transition-all"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="deleteTransaction('${tr.id}')" class="w-9 h-9 rounded-full bg-red-50 text-red-600 hover:bg-red-500 hover:text-white flex items-center justify-center shadow-sm transition-all"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+                list.innerHTML += html;
+            });
+        }
+
+        // --- UI Interactions ---
+        function openModal() {
+            document.getElementById('transactionForm').reset();
+            document.getElementById('editId').value = '';
+            document.getElementById('modalTitle').textContent = t('newTransaction');
+            document.getElementById('date').valueAsDate = new Date();
+            
+            document.querySelector('input[name="type"][value="income"]').checked = true;
+            toggleLoanFields();
+
+            const modal = document.getElementById('transactionModal');
+            const content = document.getElementById('modalContent');
+            
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                content.classList.remove('translate-y-20', 'scale-95');
+            }, 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('transactionModal');
+            const content = document.getElementById('modalContent');
+            content.classList.add('translate-y-20', 'scale-95');
+            setTimeout(() => {
+                modal.classList.add('opacity-0', 'pointer-events-none');
+            }, 300);
+        }
+
+        function printReport() {
+            window.print();
+        }
+
+        function toggleDarkMode() {
+            document.documentElement.classList.toggle('dark');
+            const isDark = document.documentElement.classList.contains('dark');
+            
+            if(isDark) {
+               document.body.style.backgroundColor = '#0f172a';
+               document.querySelectorAll('.bg-white').forEach(el => {
+                   el.style.backgroundColor = '#1e293b';
+                   el.style.borderColor = '#334155';
+                   el.style.color = '#e2e8f0';
+               });
+               document.querySelectorAll('.text-slate-800').forEach(el => el.classList.replace('text-slate-800', 'text-slate-200'));
+            } else {
+               document.body.style.backgroundColor = '#f8fafc';
+               location.reload(); 
+            }
+        }
+
+        document.getElementById('transactionModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('transactionModal')) closeModal();
+        });
+
+
+        // --- PDF Feature Logic ---
+
+        function openPdfModal() {
+            // Set default dates (First day of month to Today)
+            const date = new Date();
+            const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+            
+            document.getElementById('pdfStartDate').valueAsDate = firstDay;
+            document.getElementById('pdfEndDate').valueAsDate = date;
+
+            const modal = document.getElementById('pdfModal');
+            const content = document.getElementById('pdfModalContent');
+            
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => content.classList.remove('scale-95'), 10);
+        }
+
+        function closePdfModal() {
+            const modal = document.getElementById('pdfModal');
+            const content = document.getElementById('pdfModalContent');
+            
+            content.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('opacity-0', 'pointer-events-none'), 200);
+        }
+
+        async function generateCustomPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const startDate = document.getElementById('pdfStartDate').value;
+            const endDate = document.getElementById('pdfEndDate').value;
+
+            if (!startDate || !endDate) {
+                Swal.fire('Error', 'Please select both dates', 'warning');
+                return;
+            }
+
+            // Filter Transactions by Date Range
+            const reportData = transactions.filter(t => {
+                return t.date >= startDate && t.date <= endDate;
+            }).sort((a, b) => new Date(a.date) - new Date(b.date));
+
+            if (reportData.length === 0) {
+                Swal.fire('No Data', 'No transactions found in this date range.', 'info');
+                return;
+            }
+
+            // Calculate Totals for this range
+            let totalInc = 0, totalExp = 0;
+            reportData.forEach(t => {
+                if (t.type === 'income') totalInc += t.amount;
+                if (t.type === 'expense') totalExp += t.amount;
+            });
+            const balance = totalInc - totalExp;
+
+            // --- PDF Design ---
+            
+            // Header
+            doc.setFontSize(22);
+            doc.setTextColor(40, 40, 40);
+            doc.text("Infinity-Wallet Report", 14, 20);
+
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text(`Generated on: ${new Date().toLocaleString()}`, 14, 26);
+            
+            // Date Range Box
+            doc.setDrawColor(200, 200, 200);
+            doc.setFillColor(248, 250, 252);
+            doc.roundedRect(14, 32, 180, 16, 2, 2, 'FD');
+            
+            doc.setFontSize(11);
+            doc.setTextColor(60, 60, 60);
+            doc.text(`Period: ${startDate}  to  ${endDate}`, 20, 43);
+
+            // Summary Cards (Simple Text representation)
+            doc.setFontSize(12);
+            doc.setTextColor(22, 163, 74); // Green
+            doc.text(`Income: +${totalInc.toFixed(2)}`, 14, 60);
+            
+            doc.setTextColor(220, 38, 38); // Red
+            doc.text(`Expense: -${totalExp.toFixed(2)}`, 80, 60);
+            
+            doc.setTextColor(79, 70, 229); // Purple
+            doc.text(`Balance: ${balance.toFixed(2)}`, 140, 60);
+
+            // Table
+            const tableBody = reportData.map(t => [
+                t.date,
+                // Simple mapping to English for PDF safely (Bengali fonts need complex setup)
+                t.type.toUpperCase(),
+                t.category === 'Loan' ? t.person : t.category,
+                t.note || '-',
+                t.amount.toFixed(2)
+            ]);
+
+            doc.autoTable({
+                startY: 70,
+                head: [['Date', 'Type', 'Category/Person', 'Note', 'Amount']],
+                body: tableBody,
+                theme: 'grid',
+                headStyles: { fillColor: [30, 41, 59], textColor: 255 },
+                styles: { fontSize: 9, cellPadding: 3 },
+                alternateRowStyles: { fillColor: [241, 245, 249] },
+                columnStyles: {
+                    4: { halign: 'right', fontStyle: 'bold' } // Amount column
+                },
+                didParseCell: function(data) {
+                    // Color code amounts
+                    if (data.section === 'body' && data.column.index === 4) {
+                        const type = data.row.raw[1]; // Get Type from raw data
+                        if (type.includes('INCOME')) data.cell.styles.textColor = [22, 163, 74];
+                        else if (type.includes('EXPENSE')) data.cell.styles.textColor = [220, 38, 38];
+                    }
+                }
+            });
+
+            // Save
+            doc.save(`Wallet-Report-${startDate}-to-${endDate}.pdf`);
+            closePdfModal();
+            Swal.fire('Downloaded', 'Your PDF report has been generated.', 'success');
+        }
+
     </script>
 </body>
 </html>
